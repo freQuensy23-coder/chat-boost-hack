@@ -1,0 +1,6 @@
+faiss-cpu==1.7.4
+gigachain==0.0.343
+sentence-transformers==2.2.2
+-i https://download.pytorch.org/whl/cpu
+torch==2.1.1
+transformers==4.35.2
