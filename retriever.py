@@ -29,7 +29,7 @@ def get_vector_store(
     documents = load_documents(documents_dir)
 
     if use_cache and os.path.isdir(vector_store_dir):
-        vector_store = FAISS.load_local(documents, embedder)
+        vector_store = FAISS.load_local(vector_store_dir, embedder)
     else:
         vector_store = FAISS.from_documents(documents, embedder)
 
