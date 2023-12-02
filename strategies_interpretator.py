@@ -7,7 +7,7 @@ from history import DialogHistory
 from utils import batched
 from instructions import instructions, stages
 
-token='YjNjOGIwMjctZGY2Ny00MTk0LWFmZDUtZGM2NjBjOTYwNjIwOmI3MTRjMmJjLTIzMjEtNDc3OC1iNGZjLTgwNGVmYTIxODQxZg=='
+token = 'YjNjOGIwMjctZGY2Ny00MTk0LWFmZDUtZGM2NjBjOTYwNjIwOmI3MTRjMmJjLTIzMjEtNDc3OC1iNGZjLTgwNGVmYTIxODQxZg=='
 class StrategyInterpreter:
     """Summarize dialog history into one question.
         input:
@@ -27,7 +27,6 @@ class StrategyInterpreter:
             self.strategies = file.read()
         self.stages = stages
         self.instructions = instructions
-
 
     def __call__(self, history: DialogHistory) -> str:
         system_message = "Тебе на вход поступил диалог клиента и менеджера по продажам в чате, а также документ с описаниями шагов продаж. Определи, какой это шаг продаж и инструкцию к этому шагу, описанную в документе"
