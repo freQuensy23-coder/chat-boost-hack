@@ -61,13 +61,16 @@ class DialogHistory:
         res = ''
         for message in self._history:
             if source == 'user':
-                res += f'User: {message.content}\n'
+                res += f'Пользователь: {message.content}\n'
                 source = 'ai'
             else:
-                res += f'AI: {message.content}\n'
+                res += f'Менеджер: {message.content}\n'
                 source = 'user'
 
         return res.strip()
+
+    def __getitem__(self, item):
+        return self._history[item]
 
 
 if __name__ == '__main__':
