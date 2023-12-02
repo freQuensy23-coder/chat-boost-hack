@@ -7,7 +7,7 @@ from langchain.chat_models.gigachat import GigaChat
 import config
 from dialog_history_summarizer import DialogHistorySummarizer
 from history import DialogHistory
-from retriever import get_vector_store, format_query
+from retriever import get_vector_store, format_query, get_retriever
 from strategies_interpretator import StrategyInterpreter
 
 # Авторизация в сервисе GigaChat
@@ -38,7 +38,7 @@ def get_sell_stage_instruction(message, chat_history) -> str:
 
 def prompt_processor(chat_history: DialogHistory, message: str, stage_instruction: str,
                      dynamic_info: list) -> DialogHistory:
-    dynamic_info = '\n * '.join(map(lambda x: x['document'], dynamic_info))
+    dynamic_info = '\n * '.join(map(lambda x: x.page_content,  dynamic_info))
 
     system_message = (f'{stage_instruction}\n Вот дополнительная информация из базы знаний, на основании которой нужно '
                       f'отвечать \n * {dynamic_info}')
@@ -48,10 +48,10 @@ def prompt_processor(chat_history: DialogHistory, message: str, stage_instructio
 def respond(message, chat_history):
     global db
     """Event listener on message submit"""
-    chat_history = DialogHistory(chat_history)
+    chat_history = DialogHistory([item for tpl in chat_history for item in tpl] + [message])
     db_query = DialogHistorySummarizer()(chat_history)
     documents = db(db_query)
-    stage_instruction = StrategyInterpreter()(DialogHistory([item for tpl in chat_history for item in tpl] + [message]))
+    stage_instruction = StrategyInterpreter()(chat_history)
 
     prompt = prompt_processor(chat_history, message, stage_instruction, documents)
 
@@ -74,13 +74,10 @@ with gr.Blocks() as demo:
 
 class Database:
     def __init__(self):
-        self.vector_store = get_vector_store(
-            documents_dir='documents',
-            vector_store_dir='vector_store',
-        )
+        self.retriever = get_retriever(documents_dir='documents')
 
     def __call__(self, query: str):
-        return self.vector_store.similarity_search_with_relevance_scores(
+        return self.retriever.get_relevant_documents(
             format_query(query),
         )
 
