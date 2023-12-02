@@ -1,8 +1,6 @@
 from typing import Tuple, List
 
 import gradio as gr
-import random
-import time
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain.chat_models.gigachat import GigaChat
 
@@ -15,7 +13,7 @@ chat = GigaChat(credentials=config.token, verify_ssl_certs=False)
 def create_gigachat_history(history: [Tuple[str, str]],
                             message: str,
                             base_prompt: str) -> List:
-    """Create a list of Longchain message objects based on a history of messages in gradio format"""
+    """Create a list of Long chain message objects based on a history of messages in gradio format"""
     base_prompt = [
         SystemMessage(
             content=base_prompt
@@ -29,12 +27,6 @@ def create_gigachat_history(history: [Tuple[str, str]],
         result.append(HumanMessage(content=message))
     return base_prompt + result
 
-
-messages = [
-    SystemMessage(
-        content="Ты эмпатичный бот-психолог, который помогает пользователю решить его проблемы."
-    )
-]
 
 with gr.Blocks() as demo:
     chatbot = gr.Chatbot()
