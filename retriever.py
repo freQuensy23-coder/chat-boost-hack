@@ -1,5 +1,7 @@
+import math
 import os
 from glob import glob
+from typing import Literal
 
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.retrievers import ParentDocumentRetriever
@@ -7,6 +9,56 @@ from langchain.schema import Document
 from langchain.storage import InMemoryStore
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.chroma import Chroma
+from langchain_core.callbacks import CallbackManagerForRetrieverRun
+
+
+class WeightedParentDocumentRetriever(ParentDocumentRetriever):
+    aggregation: Literal['min', 'mean'] = 'min'
+    length_normalization: bool = False
+
+    def _get_total_score(self, scores: list[float]) -> float:
+        if self.aggregation == 'min':
+            return min(scores)
+        if self.aggregation == 'mean':
+            return sum(scores) / len(scores)
+
+    def _get_relevant_documents(
+        self, query: str, *, run_manager: CallbackManagerForRetrieverRun,
+    ) -> list[tuple[Document, float]]:
+        child_documents = self.vectorstore.similarity_search_with_score(
+            query, **self.search_kwargs,
+        )
+
+        document_ids = {}
+        for child_document in child_documents:
+            document_id = child_document[0].metadata[self.id_key]
+            if document_id not in document_ids:
+                document_ids[document_id] = {'scores': []}
+            score = child_document[1]
+            if self.length_normalization:
+                score /= math.log(len(child_document[0].page_content))
+            document_ids[document_id]['scores'].append(score)
+
+        for document_id in document_ids:
+            total_score = self._get_total_score(
+                document_ids[document_id]['scores'],
+            )
+            document_ids[document_id]['total_score'] = total_score
+
+        documents = self.docstore.mget(list(document_ids.keys()))
+
+        total_scores = [
+            document_ids[document_id]['total_score']
+            for document_id in document_ids
+        ]
+
+        scored_documents = []
+        for idx, document in enumerate(documents):
+            if document is None:
+                continue
+            scored_documents.append((document, total_scores[idx]))
+
+        return sorted(scored_documents, key=lambda document: document[1])
 
 
 def format_query(query: str) -> str:
@@ -40,14 +92,14 @@ def get_vector_store() -> Chroma:
     return Chroma(embedding_function=embedder)
 
 
-def get_retriever(documents_dir: str) -> ParentDocumentRetriever:
+def get_retriever(documents_dir: str) -> WeightedParentDocumentRetriever:
     child_splitter = CharacterTextSplitter(
         separator='\n', chunk_size=10, chunk_overlap=0,
     )
     parent_splitter = CharacterTextSplitter(
         separator='\n\n', chunk_size=10, chunk_overlap=0,
     )
-    retriever = ParentDocumentRetriever(
+    retriever = WeightedParentDocumentRetriever(
         vectorstore=get_vector_store(),
         docstore=InMemoryStore(),
         child_splitter=child_splitter,
@@ -73,6 +125,7 @@ def load_documents(documents_dir: str) -> list[Document]:
 
 if __name__ == '__main__':
     retriever = get_retriever(documents_dir='documents')
-    relevant_documents = retriever.get_relevant_documents(
+    relevant_documents: list[tuple[Document, float]] = retriever.get_relevant_documents(
         format_query('Я хотел бы настроить переадресацию'),
+        search_kwargs={'k': 10}, # control the number of retrieved child documents
     )
