@@ -8,6 +8,7 @@ import config
 from dialog_history_summarizer import DialogHistorySummarizer
 from history import DialogHistory
 from retriever import get_vector_store, format_query
+from strategies_interpretator import StrategyInterpreter
 
 # Авторизация в сервисе GigaChat
 chat = GigaChat(credentials=config.token, verify_ssl_certs=False)
@@ -49,8 +50,8 @@ def respond(message, chat_history):
     """Event listener on message submit"""
     chat_history = DialogHistory(chat_history)
     db_query = DialogHistorySummarizer()(chat_history)
-    documents = db(db_query)  # TODO create database class
-    stage_instruction = get_sell_stage_instruction(message, chat_history)
+    documents = db(db_query)
+    stage_instruction = StrategyInterpreter()(DialogHistory([item for tpl in chat_history for item in tpl] + [message]))
 
     prompt = prompt_processor(chat_history, message, stage_instruction, documents)
 
