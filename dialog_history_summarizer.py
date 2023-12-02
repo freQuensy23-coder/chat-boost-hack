@@ -16,15 +16,24 @@ class DialogHistorySummarizer:
             Расскажите мне подробнее о вашей годовой подписке за 1999 в год и ее бонусах.
     """
 
-    # Singleton init
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(DialogHistorySummarizer, cls).__new__(cls)
+            # Инициализация объекта
+            cls._instance.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
+        return cls._instance
+
     def __init__(self):
         self.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
 
     def __call__(self, history: DialogHistory) -> str:
-        system_message = """Тебе дан диалог между пользователем и менеджером. Переформулируй его в один понятный вопрос от пользователя, начни с User:"""
-        prompt = [SystemMessage(content=system_message), HumanMessage(content=history.__str__())]
+        system_message = """Тебе дан диалог между пользователем и менеджером. Переформулируй последнее пользователя сообщение в один понятный вопрос, учитывая контекст диалога"""
+        prompt = [SystemMessage(content=system_message), HumanMessage(
+            content=str(history[:-1]) + f'\n\n Последний вопрос от пользователя: {history[-1].content}')]
         res = self.llm(prompt)
-        return res.content
+        return res.content.replace('\n', '').replace('?', '')
 
 
 if __name__ == '__main__':
@@ -35,4 +44,3 @@ if __name__ == '__main__':
         history = DialogHistory(*batched(history, 2), system_message=None)
         summarizer = DialogHistorySummarizer()
         print(summarizer(history))
-

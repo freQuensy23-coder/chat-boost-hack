@@ -36,6 +36,7 @@ with gr.Blocks() as demo:
 
 
     def respond(message, chat_history, system_prompt_str):
+        """Event listener on message submit"""
         gigachat_messages = create_gigachat_history(chat_history, message, system_prompt_str)
         res = chat(gigachat_messages)
         chat_history.append((message, res.content))
