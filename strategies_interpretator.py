@@ -7,7 +7,6 @@ from history import DialogHistory
 from utils import batched
 from instructions import instructions, stages
 
-token = 'YjNjOGIwMjctZGY2Ny00MTk0LWFmZDUtZGM2NjBjOTYwNjIwOmI3MTRjMmJjLTIzMjEtNDc3OC1iNGZjLTgwNGVmYTIxODQxZg=='
 class StrategyInterpreter:
     """Summarize dialog history into one question.
         input:
@@ -20,13 +19,14 @@ class StrategyInterpreter:
 
     # Singleton init
     def __init__(self):
-        self.llm = GigaChat(credentials=token, verify_ssl_certs=False)
+        self.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
         file_path = 'SalesStepsDescriptionAndActions.txt'
 
         with open(file_path, 'r') as file:
             self.strategies = file.read()
         self.stages = stages
         self.instructions = instructions
+
 
     def __call__(self, history: DialogHistory) -> str:
         system_message = "Тебе на вход поступил диалог клиента и менеджера по продажам в чате, а также документ с описаниями шагов продаж. Определи, какой это шаг продаж и инструкцию к этому шагу, описанную в документе"
