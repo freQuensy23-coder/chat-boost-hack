@@ -9,6 +9,8 @@ from dialog_history_summarizer import DialogHistorySummarizer
 from history import DialogHistory
 from retriever import get_vector_store, format_query, get_retriever
 from strategies_interpretator import StrategyInterpreter
+import nltk
+from nltk.stem.snowball import SnowballStemmer
 
 # Авторизация в сервисе GigaChat
 chat = GigaChat(credentials=config.token, verify_ssl_certs=False)
@@ -32,13 +34,27 @@ def create_gigachat_history(history: [Tuple[str, str]],
     return base_prompt + result
 
 
-def get_sell_stage_instruction(message, chat_history) -> str:
-    return 'Ты ии-ассистент'
+# Установка NLTK и загрузка русского стеммера
+nltk.download('punkt')
+stemmer = SnowballStemmer("russian")
+
+
+def contain_stopword(message):
+    # Определение стоп-слов
+    stopwords = ['оператор', 'связь', 'помощь', 'поддержка', 'хватит', 'переключи', 'позови', 'человек']  # Добавьте больше слов по необходимости
+
+    words = nltk.word_tokenize(message)
+    stemmed_words = [stemmer.stem(word) for word in words]
+
+    for stopword in stopwords:
+        if stemmer.stem(stopword) in stemmed_words:
+            return True
+    return False
 
 
 def prompt_processor(chat_history: DialogHistory, message: str, stage_instruction: str,
                      dynamic_info: list) -> DialogHistory:
-    dynamic_info = '\n * '.join(map(lambda x: x.page_content,  dynamic_info))
+    dynamic_info = '\n * '.join(map(lambda x: x.page_content, dynamic_info))
 
     system_message = (f'{stage_instruction}\n Вот дополнительная информация из базы знаний, на основании которой нужно '
                       f'отвечать \n * {dynamic_info}')
@@ -48,6 +64,9 @@ def prompt_processor(chat_history: DialogHistory, message: str, stage_instructio
 def respond(message, chat_history):
     global db
     """Event listener on message submit"""
+
+    if contain_stopword(message):
+        return '', chat_history + [(message, 'Сейчас свяжу с оператором \n\n Ожидаемое время ответа - 5 минут')]
     chat_history = DialogHistory([item for tpl in chat_history for item in tpl] + [message])
     db_query = DialogHistorySummarizer()(chat_history)
     documents = db(db_query)
@@ -60,6 +79,7 @@ def respond(message, chat_history):
     gradio_history = prompt.gradio_history
     gradio_history.append((message, res.content))
     # '' - to clean the input field
+
     return '', gradio_history
 
 
