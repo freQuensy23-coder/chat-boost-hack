@@ -4,6 +4,7 @@ from typing import Tuple, List
 import gradio as gr
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, BaseMessage
 from langchain.chat_models.gigachat import GigaChat
+from langchain.chat_models.openai import ChatOpenAI
 
 import config
 from dialog_history_summarizer import DialogHistorySummarizer
@@ -14,7 +15,8 @@ import nltk
 from nltk.stem.snowball import SnowballStemmer
 
 # Авторизация в сервисе GigaChat
-chat = GigaChat(credentials=config.t, verify_ssl_certs=False)
+# chat = GigaChat(credentials=config.t, verify_ssl_certs=False)
+chat = ChatOpenAI(openai_api_key=config.t2)
 
 
 def create_gigachat_history(history: [Tuple[str, str]],
@@ -42,7 +44,8 @@ stemmer = SnowballStemmer("russian")
 
 def contain_stopword(message):
     # Определение стоп-слов
-    stopwords = ['оператор', 'связь', 'помощь', 'поддержка', 'хватит', 'переключи', 'позови', 'человек']  # Добавьте больше слов по необходимости
+    stopwords = ['оператор', 'связь', 'помощь', 'поддержка', 'хватит', 'переключи', 'позови',
+                 'человек']  # Добавьте больше слов по необходимости
 
     words = nltk.word_tokenize(message)
     stemmed_words = [stemmer.stem(word) for word in words]
@@ -93,7 +96,6 @@ with gr.Blocks() as demo:
 
     msg.submit(functools.partial(respond, debug=False), [msg, chatbot], [msg, chatbot])
 
-
 with gr.Blocks() as debug:
     chatbot = gr.Chatbot()
     msg = gr.Textbox()
@@ -117,5 +119,5 @@ class Database:
 
 if __name__ == "__main__":
     db = Database()
-    demo.launch(share=True)
-    # debug.launch(share=True)
+    # demo.launch(share=True)
+    debug.launch(share=True)

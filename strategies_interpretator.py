@@ -19,7 +19,7 @@ class StrategyInterpreter:
 
     # Singleton init
     def __init__(self):
-        self.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
+        self.llm = GigaChat(credentials=config.t, verify_ssl_certs=False)
         file_path = 'SalesStepsDescriptionAndActions.txt'
 
         with open(file_path, 'r') as file:

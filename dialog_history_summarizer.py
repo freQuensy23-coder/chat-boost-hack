@@ -22,11 +22,11 @@ class DialogHistorySummarizer:
         if cls._instance is None:
             cls._instance = super(DialogHistorySummarizer, cls).__new__(cls)
             # Инициализация объекта
-            cls._instance.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
+            cls._instance.llm = GigaChat(credentials=config.t, verify_ssl_certs=False)
         return cls._instance
 
     def __init__(self):
-        self.llm = GigaChat(credentials=config.token, verify_ssl_certs=False)
+        self.llm = GigaChat(credentials=config.t, verify_ssl_certs=False)
 
     def __call__(self, history: DialogHistory) -> str:
         system_message = """Тебе дан диалог между пользователем и менеджером. Переформулируй последнее пользователя сообщение в один понятный вопрос, учитывая контекст диалога"""

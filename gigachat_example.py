@@ -7,7 +7,7 @@ from langchain.chat_models.gigachat import GigaChat
 import config
 
 # Авторизация в сервисе GigaChat
-chat = GigaChat(credentials=config.token, verify_ssl_certs=False)
+chat = GigaChat(credentials=config.t, verify_ssl_certs=False)
 
 
 def create_gigachat_history(history: [Tuple[str, str]],
