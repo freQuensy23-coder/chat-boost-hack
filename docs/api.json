@@ -94,13 +94,13 @@
         }
       }
     },
-    "/admin/dialogues/success_metric": {
+    "/admin/metrics/success_metric": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "Get Success Metric",
-        "operationId": "get_success_metric_admin_dialogues_success_metric_get",
+        "operationId": "get_success_metric_admin_metrics_success_metric_get",
         "responses": {
           "200": {
             "description": "Successful Response",
