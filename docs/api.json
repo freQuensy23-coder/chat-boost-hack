@@ -1,0 +1,262 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/chat/completion": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Completion",
+        "operationId": "completion_chat_completion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Dialogue"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Completion Chat Completion Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dialogues/{dialogue_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Dialogue",
+        "operationId": "get_dialogue_admin_dialogues__dialogue_id__get",
+        "parameters": [
+          {
+            "name": "dialogue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Dialogue Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminTurn"
+                  },
+                  "title": "Response Get Dialogue Admin Dialogues  Dialogue Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dialogues/success_metric": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Success Metric",
+        "operationId": "get_success_metric_admin_dialogues_success_metric_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMetric"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Actor": {
+        "type": "string",
+        "enum": [
+          "USER",
+          "ASSISTANT"
+        ],
+        "title": "Actor"
+      },
+      "AdminTurn": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/Actor"
+          },
+          "utterance": {
+            "type": "string",
+            "title": "Utterance"
+          },
+          "logged_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Logged At"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          }
+        },
+        "type": "object",
+        "required": [
+          "actor",
+          "utterance",
+          "logged_at",
+          "success"
+        ],
+        "title": "AdminTurn"
+      },
+      "Dialogue": {
+        "properties": {
+          "dialogue_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Dialogue Id"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/Turn"
+            },
+            "type": "array",
+            "title": "Turns"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dialogue_id",
+          "turns"
+        ],
+        "title": "Dialogue"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SuccessMetric": {
+        "properties": {
+          "n_started_dialogues": {
+            "type": "integer",
+            "title": "N Started Dialogues"
+          },
+          "n_succeeded_dialogues": {
+            "type": "integer",
+            "title": "N Succeeded Dialogues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "n_started_dialogues",
+          "n_succeeded_dialogues"
+        ],
+        "title": "SuccessMetric"
+      },
+      "Turn": {
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/Actor"
+          },
+          "utterance": {
+            "type": "string",
+            "title": "Utterance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "actor",
+          "utterance"
+        ],
+        "title": "Turn"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
