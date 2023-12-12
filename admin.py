@@ -1,10 +1,19 @@
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from dependencies import Pagination
 from schemas import AdminTurn, SuccessMetric
 
 router = APIRouter()
+
+
+@router.get('/dialogues')
+def get_dialogues(
+    pagination: Annotated[Pagination, Depends(Pagination)],
+) -> list[uuid.UUID]:
+    return []
 
 
 @router.get('/dialogues/{dialogue_id}')

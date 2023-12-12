@@ -25,3 +25,9 @@ class SuccessAnalyzer(object):
         # check if there is name + phone number in dialogue
         # logging + metrics
         ...
+
+
+class Pagination(object):
+    def __init__(self, offset: int = 0, limit: int = 100) -> None:
+        self.offset = offset
+        self.limit = limit
