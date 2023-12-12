@@ -1,7 +1,13 @@
+import datetime
 import uuid
 from enum import Enum
 
 from pydantic import BaseModel
+
+
+class SuccessMetric(BaseModel):
+    n_started_dialogues: int
+    n_succeeded_dialogues: int
 
 
 class Actor(str, Enum):
@@ -15,6 +21,11 @@ class Turn(BaseModel):
 
     def __str__(self) -> str:
         return '{0}: {1}'.format(self.actor, self.utterance)
+
+
+class AdminTurn(Turn):
+    logged_at: datetime.datetime
+    success: bool
 
 
 class Dialogue(BaseModel):
